@@ -1,53 +1,54 @@
 # %%[Sprint 1] -  Leitura e diagnóstico
 import pandas as pd
 
-# Leitura do arquivo CSV
+# Leitura do arquivo CSV (Base Varejo.csv) com separador ';' e encoding 'latin-1' (para lidar com acentuação)
 df = pd.read_csv("data/Base Varejo.csv", sep=";", encoding="latin-1")
 
-# Verificação inicial do DataFrame
+# Verificação inicial do DataFrame (exibição das primeiras linhas, dimensões, colunas e informações gerais)
 df.head()
 print("\nDimensões (linhas, colunas):", df.shape)
 print("\nColunas:", df.columns)
 print("\nInfo:")
 df.info()
 
-# Quantidade de nulos por coluna
+# Quantidade de nulos por coluna (verificação de dados ausentes)
 nulos = df.isnull().sum()
 print("\nQuantidade de nulos por coluna:")
 print(nulos)
 
-# Linhas duplicadas
+# Linhas duplicadas (identificação de registros repetidos)
 duplicadas = df.duplicated().sum()
 print("\nQuantidade de linhas duplicadas:", duplicadas)
 
-# Inconsistências nos tipos de dados
+# Inconsistências nos tipos de dados (identificação de colunas com tipos de dados 'object', que podem indicar inconsistências)
 tipos_inconsistentes = df.dtypes[df.dtypes == 'object']
 print("\nColunas com tipos de dados inconsistentes:")
 print(tipos_inconsistentes)
 
 # %%[Sprint 2] -  Limpeza e padronização
-# Cópia de segurança da base bruta
+# Cópia de segurança da base bruta (df) para a base limpa (df_clean)
 df_clean = df.copy()
 
-# Remoção de colunas vazias ('Unnamed') identificadas na Sprint 1
+# Remoção de colunas vazias ('Unnamed') identificadas na Sprint 1 
+# Método de Lista de Compreensão para identificar colunas que começam com "Unnamed" e que possuem todos os valores nulos
 colunas_vazias = [c for c in df_clean.columns if str(c).startswith("Unnamed") and df_clean[c].isna().all()]
 df_clean = df_clean.drop(columns=colunas_vazias)
 
-colunas_texto = ["CL_GENERO", "CL_SEG", "PR_CAT", "PR_NOME"]
-textos_nulos = ["", "#n/d", "#n/a", "n/d", "nan", "null"]
+colunas_texto = ["CL_GENERO", "CL_SEG", "PR_CAT", "PR_NOME"] # Lista de colunas que serão tratadas como texto (string) para padronização
+textos_nulos = ["", "#n/d", "#n/a", "n/d", "nan", "null"] # Lista de valores que serão tratados como nulos (NaN) para padronização
 
-for coluna in colunas_texto:
+for coluna in colunas_texto: # (Tratamento de textos com Metodologia de Encadeamento de Funções Pandas)
     if coluna in df_clean.columns:
         df_clean[coluna] = (
             df_clean[coluna]
-            .astype("string")
-            .str.strip()
-            .str.replace(r"\s+", " ", regex=True)
-            .str.lower()
-            .replace(textos_nulos, pd.NA)
+            .astype("string") # Coluna convertida para tipo string (para padronização)
+            .str.strip() # Remoção de espaços em branco no início e no final da string
+            .str.replace(r"\s+", " ", regex=True) # Substituição de múltiplos espaços por um único espaço
+            .str.lower() # Conversão de todos os caracteres para minúsculas (lowercase)
+            .replace(textos_nulos, pd.NA) # Substituição de valores inconsistentes por NaN (nulo padronizado)
         )
 
-# Remoção de duplicatas confirmadas
+# Remoção de duplicatas confirmadas 
 linhas_antes = len(df_clean)
 df_clean = df_clean.drop_duplicates()
 linhas_removidas_dup = linhas_antes - len(df_clean)
@@ -65,10 +66,10 @@ df_clean.to_csv("data/dados_limpos.csv", index=False)
 print("\nBase limpa exportada com sucesso para 'data/dados_limpos.csv'!")
 
 # %%[Sprint 3] -  Funções e organização
-# Definição das funções
-def tratar_dados(tabela):
+# Definição das funções 
+def tratar_dados(tabela): # Função modularizada para tratamento de dados (limpeza e padronização)
     tratado = tabela.copy()
-    colunas_vazias = [c for c in tratado.columns if str(c).startswith("Unnamed") and tratado[c].isna().all()]
+    colunas_vazias = [c for c in tratado.columns if str(c).startswith("Unnamed") and tratado[c].isna().all()] # Identificação de colunas vazias
     tratado = tratado.drop(columns=colunas_vazias)
     
     colunas_texto = ["CL_GENERO", "CL_SEG", "PR_CAT", "PR_NOME"]
@@ -88,7 +89,7 @@ def tratar_dados(tabela):
     tratado = tratado.drop_duplicates().copy()
     return tratado
 
-def resumo_numerico(serie):
+def resumo_numerico(serie): # Função modularizada para resumo estatístico de uma série numérica
     return {
         "contagem_valida": serie.count(),
         "media": serie.mean(),
@@ -96,8 +97,8 @@ def resumo_numerico(serie):
         "maximo": serie.max()
     }
 
-# Execução limpa do pipeline modularizado na Sprint 3
-df_original_s3 = pd.read_csv("data/Base Varejo.csv", sep=";", encoding="latin-1")
+# Execução limpa do pipeline modularizado na Sprint 3 
+df_original_s3 = pd.read_csv("data/Base Varejo.csv", sep=";", encoding="latin-1") 
 df_limpo_s3 = tratar_dados(df_original_s3)
 
 df_limpo_s3.to_csv("data/dados_limpos.csv", index=False)
