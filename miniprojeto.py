@@ -104,7 +104,47 @@ df_limpo_s3.to_csv("data/dados_limpos.csv", index=False)
 print("Pipeline da Sprint 3 executado via funções com sucesso!")
 
 # %%[Sprint 4] -  Análise 
+import pandas as pd
 
+# Garantindo a disponibilidade da função de resumo numérico (definida na Sprint 3)
+def resumo_numerico(serie):
+    return {
+        "contagem_valida": serie.count(),
+        "media": serie.mean(),
+        "minimo": serie.min(),
+        "maximo": serie.max()
+    }
+
+# Carregamento dos dados limpos
+df_analise = pd.read_csv("data/dados_limpos.csv")
+
+# Aplicação do resumo numérico na coluna escolhida (CL_FHL)
+coluna_numerica_escolhida = "CL_FHL"
+
+if coluna_numerica_escolhida in df_analise.columns:
+    resultado_estatistico = resumo_numerico(df_analise[coluna_numerica_escolhida])
+    print(f"=== RESUMO NUMÉRICO DA COLUNA: {coluna_numerica_escolhida} ===")
+    for chave, valor in resultado_estatistico.items():
+        print(f"  - {chave}: {valor}")
+else:
+    print(f"\nAviso: A coluna '{coluna_numerica_escolhida}' não foi encontrada.")
+
+# Aplicação de um filtro com Significado
+# Filtro de negócio: isolando apenas os registros da categoria de produtos 'alimentos'
+df_alimentos = df_analise[df_analise['PR_CAT'] == 'alimentos'].copy()
+print(f"\n=== FILTRO APLICADO ===")
+print(f"Total de registros na categoria 'alimentos': {len(df_alimentos)}")
+
+# Dois groupby diferentes com explicações de negócio
+# Groupby 1: Agrupando por Categoria de Produto (PR_CAT) para medir o volume de itens comercializados por categoria
+print("\n=== GROUPBY 1: Volume de itens por Categoria de Produto (PR_CAT) ===")
+agrupado_categoria = df_analise.groupby("PR_CAT").size().reset_index(name="quantidade_itens")
+print(agrupado_categoria)
+
+# Groupby 2: Agrupando por Segmento de Cliente (CL_SEG) para medir a distribuição de compras/registros por segmento de consumidor
+print("\n=== GROUPBY 2: Volume de registros por Segmento de Cliente (CL_SEG) ===")
+agrupado_segmento = df_analise.groupby("CL_SEG").size().reset_index(name="total_registros")
+print(agrupado_segmento)
 
 # %%[Sprint 5] -  Exportação e comunicação
 
