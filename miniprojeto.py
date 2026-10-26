@@ -65,7 +65,43 @@ df_clean.to_csv("data/dados_limpos.csv", index=False)
 print("\nBase limpa exportada com sucesso para 'data/dados_limpos.csv'!")
 
 # %%[Sprint 3] -  Funções e organização
+# Definição das funções
+def tratar_dados(tabela):
+    tratado = tabela.copy()
+    colunas_vazias = [c for c in tratado.columns if str(c).startswith("Unnamed") and tratado[c].isna().all()]
+    tratado = tratado.drop(columns=colunas_vazias)
+    
+    colunas_texto = ["CL_GENERO", "CL_SEG", "PR_CAT", "PR_NOME"]
+    textos_nulos = ["", "#n/d", "#n/a", "n/d", "nan", "null"]
+    
+    for coluna in colunas_texto:
+        if coluna in tratado.columns:
+            tratado[coluna] = (
+                tratado[coluna]
+                .astype("string")
+                .str.strip()
+                .str.replace(r"\s+", " ", regex=True)
+                .str.lower()
+                .replace(textos_nulos, pd.NA)
+            )
+            
+    tratado = tratado.drop_duplicates().copy()
+    return tratado
 
+def resumo_numerico(serie):
+    return {
+        "contagem_valida": serie.count(),
+        "media": serie.mean(),
+        "minimo": serie.min(),
+        "maximo": serie.max()
+    }
+
+# Execução limpa do pipeline modularizado na Sprint 3
+df_original_s3 = pd.read_csv("data/Base Varejo.csv", sep=";", encoding="latin-1")
+df_limpo_s3 = tratar_dados(df_original_s3)
+
+df_limpo_s3.to_csv("data/dados_limpos.csv", index=False)
+print("Pipeline da Sprint 3 executado via funções com sucesso!")
 
 # %%[Sprint 4] -  Análise 
 
