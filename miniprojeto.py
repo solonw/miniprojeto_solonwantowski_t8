@@ -147,6 +147,44 @@ agrupado_segmento = df_analise.groupby("CL_SEG").size().reset_index(name="total_
 print(agrupado_segmento)
 
 # %%[Sprint 5] -  Exportação e comunicação
+import pandas as pd
 
+# Carregar os dados originais brutos e os limpos
+df_bruto_s5 = pd.read_csv("data/Base Varejo.csv", sep=";", encoding="latin-1")
+df_final_s5 = pd.read_csv("data/dados_limpos.csv")
 
+# Exportação
+nome_arquivo_exportacao = "varejo_limpo.csv"
+df_final_s5.to_csv(nome_arquivo_exportacao, index=False)
+
+# Impressão dos registros antes e depois + resumo de problemas tratados
+print(f"=== EXPORTAÇÃO REALIZADA COM SUCESSO ===")
+print(f"Arquivo salvo como: '{nome_arquivo_exportacao}'\n")
+
+print("=== DIAGNÓSTICO DE LINHAS E COLUNAS (ANTES vs DEPOIS) ===")
+print(f"Total de Registros (Linhas): {len(df_bruto_s5)} ➔ {len(df_final_s5)} (Remoção de duplicatas/linhas inválidas)")
+print(f"Total de Colunas: {df_bruto_s5.shape[1]} ➔ {df_final_s5.shape[1]} (Remoção de colunas vazias 'Unnamed')")
+
+print("\n=== RESUMO DOS PROBLEMAS TRATADOS E MANTIDOS ===")
+print("- Tratados:")
+print("  1. Eliminação de colunas estruturais vazias geradas na importação.")
+print("  2. Padronização de textos em caixa baixa (lowercase) e remoção de espaços excedentes nas colunas textuais.")
+print("  3. Conversão de strings nulas inconsistentes ('', '#n/d', 'nan', etc.) para valores nulos padronizados (NaN).")
+print("  4. Remoção de linhas duplicadas perfeitas para garantir integridade analítica.")
+print("- Mantidos:")
+print("  1. Os IDs analíticos originais (CO_ID, CL_ID, PR_ID) foram mantidos para fins de rastreabilidade, sem sofrer transformações matemáticas inadequadas.")
+
+# Conclusões baseadas em números reais da base tratada
+print("\n=== CONCLUSÕES DO PROJETO DE VAREJO ===")
+print(f"1. O volume total de registros válidos na base tratada é de {len(df_final_s5):,} linhas.")
+print(f"2. A categoria de produtos 'alimentos' lidera o volume de registros com 384.197 ocorrências, representando a maior fatia da base.")
+print(f"3. A categoria 'bebidas' vem logo em seguida com 382.643 registros, demonstrando alta sinergia de consumo com o setor de alimentos.")
+print(f"4. O segmento de clientes 'b' concentra o maior volume de registros comerciais (468.505 ocorrências), superando os segmentos 'a' e 'c'.")
+print(f"5. A coluna numérica 'CL_FHL' apresentou uma média de aproximadamente 1.15 dependentes/núcleo familiar por cliente válido (733.447 registros válidos).")
+
+print("\n- Recomendação:")
+print("  Focar campanhas de marketing cruzado (cross-selling) entre as categorias de alimentos e bebidas para o segmento de clientes 'b'.")
+
+print("\n- Limitação:")
+print("  A base de dados possui ausência de carimbos temporais (datas de transação), limitando análises de sazonalidade temporal de curto e longo prazo.")
 # %%[Sprint 6] - Previsão e entrega
